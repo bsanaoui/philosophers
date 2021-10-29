@@ -1,46 +1,67 @@
-#include "../include/philo.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <pthread.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: bsanaoui <bsanaoui@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2021/10/29 15:24:23 by bsanaoui          #+#    #+#             */
+/*   Updated: 2021/10/29 19:31:38 by bsanaoui         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
+#include "../include/philo.h"
 #include <string.h>
 
-char            *hello_msg;
-pthread_mutex_t mutex;
-
-void    *worker_thread1(void * tid)
+void	*philosopher(void *phi)
 {
-    hello_msg = "HELLO WORLD"; 
-    pthread_mutex_lock(&mutex);
-    pthread_mutex_unlock(&mutex);
-    return (NULL);
+	t_philo *philo;
+
+	philo = (t_philo *)phi;
+	pthread_mutex_lock(&philo->p->mutex);
+	write(1, "Number PHILOS = ", 16);
+	printf("%d", philo->id);
+	write (1, "\n", 1);
+	pthread_mutex_unlock(&philo->p->mutex);
+	return (philo);
 }
 
-void    *worker_thread2(void * tid)
+t_philo	*create_philos(t_param *p)
 {
-    int i;
+	int		i;
+	t_philo	*philos;
 
+	philos = (t_philo *)malloc(sizeof(t_philo) * p->number_of_philos);
     i = 0;
-    pthread_mutex_lock(&mutex);
-    while (hello_msg[i])
-        printf("%c\t",hello_msg[i++]);
-    pthread_mutex_unlock(&mutex);
-    return (NULL);
+	while (i < p->number_of_philos)
+	{
+		philos[i].p = p;
+		philos[i].id = i;
+		philos[i].e_status = THINKING;
+		pthread_create(&philos[i].tid, NULL, philosopher, &philos[i]);
+		i++;
+	}
+	return (philos);
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-    pthread_t   tid0; 
-    pthread_t   tid1;
+    t_param *param;
+	t_philo	*philos;
+	int		i;
 
-    pthread_mutex_init(&mutex, NULL);
-    pthread_create(&tid0, NULL, worker_thread1, (void *)&tid0);
-    pthread_create(&tid1, NULL, worker_thread2, (void *)&tid1);
-    wait(1);
+    param = collect_data(argc, argv);
+	printf("%d %llu %llu %llu %d\n", param->number_of_philos, param->time_to_die, param->time_to_die, param->time_to_sleep, param->number_time_eat);
 
-    pthread_mutex_destroy(&mutex);
-    pthread_join(tid0, NULL);
-    pthread_join(tid1, NULL);
+	//*********** init mutex ***********//
+	pthread_mutex_init(&param->mutex, NULL);
+	//*********** Create Philos *******//
+    philos = create_philos(param);
+	//**********************************//
+	i = -1;
+	while (++i < param->number_of_philos)
+		pthread_join(philos[i].tid, NULL);
+	//*********************************//
+	pthread_mutex_destroy(&param->mutex);
     return (0);
 }

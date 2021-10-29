@@ -1,7 +1,7 @@
 .PHONY: all fclean clean re bonus
 NAME = philo
 
-CC = gcc #-g -fsanitize=address
+CC = gcc -g -fsanitize=address
 FLAGS = -Werror -Wextra -Wall
 
 SRC = $(wildcard src/*.c)
@@ -25,4 +25,4 @@ push:
 		git push origin
 
 main:
-		@make re && ./philo
+		@make re && ./philo $(args)
