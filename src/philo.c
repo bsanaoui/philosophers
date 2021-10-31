@@ -6,7 +6,7 @@
 /*   By: bsanaoui <bsanaoui@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/29 15:24:23 by bsanaoui          #+#    #+#             */
-/*   Updated: 2021/10/29 19:31:38 by bsanaoui         ###   ########.fr       */
+/*   Updated: 2021/10/29 19:35:05 by bsanaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ void	*philosopher(void *phi)
 	philo = (t_philo *)phi;
 	pthread_mutex_lock(&philo->p->mutex);
 	write(1, "Number PHILOS = ", 16);
-	printf("%d", philo->id);
+	printf("%d\n", philo->id);
 	write (1, "\n", 1);
 	pthread_mutex_unlock(&philo->p->mutex);
 	return (philo);
