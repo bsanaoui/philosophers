@@ -6,7 +6,7 @@
 /*   By: bsanaoui <bsanaoui@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/29 17:14:19 by bsanaoui          #+#    #+#             */
-/*   Updated: 2021/10/29 19:13:39 by bsanaoui         ###   ########.fr       */
+/*   Updated: 2021/10/31 12:48:08 by bsanaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,6 @@ t_param	*collect_data(int argc, char *argv[])
 		param->number_time_eat = -1;
 		if (argc == 6)
 			param->number_time_eat = ft_atoi(argv[5]);
-			
 	}
 	else
 	{
@@ -34,4 +33,34 @@ t_param	*collect_data(int argc, char *argv[])
 		exit(EXIT_SUCCESS);
 	}
 	return (param);
+}
+
+pthread_mutex_t	*init_forks_mutex(int nb_fork)
+{
+	pthread_mutex_t *forks;
+	int				i;
+
+	forks = malloc(sizeof(pthread_mutex_t) * nb_fork);
+	i = 0;
+	while (i < nb_fork)
+		pthread_mutex_init(&forks[i++], NULL);
+	return (forks);
+}
+
+int	destroy_forks_mutex(pthread_mutex_t *forks, int nb)
+{
+	int	i;
+	
+	i = 0;
+	while (i < nb)
+		pthread_mutex_destroy(&forks[i++]);
+	return (1);
+}
+
+uint64_t	ft_get_time(void)
+{
+	struct timeval current_time;
+
+	gettimeofday(&current_time, NULL);
+	return(current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
 }
