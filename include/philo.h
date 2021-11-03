@@ -6,7 +6,7 @@
 /*   By: bsanaoui <bsanaoui@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/29 15:24:18 by bsanaoui          #+#    #+#             */
-/*   Updated: 2021/10/31 13:07:16 by bsanaoui         ###   ########.fr       */
+/*   Updated: 2021/11/03 16:51:35 by bsanaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,6 +40,7 @@ typedef struct s_philo
 		SLEEPING,
 	} e_status;
 	uint64_t		last_time_eat;
+	int				nb_eat;
 	t_param			*p;
 	pthread_mutex_t	*forks;
 }	t_philo;
@@ -49,8 +50,9 @@ int				ft_atoi(const char *str);
 pthread_mutex_t	*init_forks_mutex(int nb_fork);
 int				destroy_forks_mutex(pthread_mutex_t *forks, int nb);
 uint64_t		ft_get_time(void);
-
 int				thinking(t_philo *philo);
 int				eating(t_philo *philo);
 int				sleeping(t_philo *philo);
+int				is_pair(int	n);
+int				are_finish_eating_nb(t_philo *philos, int nb);
 #endif

@@ -6,7 +6,7 @@
 /*   By: bsanaoui <bsanaoui@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/29 17:14:19 by bsanaoui          #+#    #+#             */
-/*   Updated: 2021/10/31 12:48:08 by bsanaoui         ###   ########.fr       */
+/*   Updated: 2021/11/03 16:51:50 by bsanaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,10 +57,31 @@ int	destroy_forks_mutex(pthread_mutex_t *forks, int nb)
 	return (1);
 }
 
+int	is_pair(int	n)
+{
+	if (n % 2 == 0)
+		return (1);
+	return (0);
+}
+
 uint64_t	ft_get_time(void)
 {
-	struct timeval current_time;
+	struct timeval	current_time;
+	static uint64_t	first_time = 0;
 
 	gettimeofday(&current_time, NULL);
-	return(current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
+	if (first_time == 0)
+		first_time = (current_time.tv_sec * 1000 + current_time.tv_usec / 1000);
+	return((current_time.tv_sec * 1000 + current_time.tv_usec / 1000));
+}
+
+int	are_finish_eating_nb(t_philo *philos, int nb)
+{
+	int	i;
+
+	i = -1;
+	while (++i < nb)
+		if (philos[i].nb_eat < philos[i].p->number_time_eat)
+			return (0);
+	return (1);
 }
