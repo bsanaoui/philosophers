@@ -6,7 +6,7 @@
 /*   By: bsanaoui <bsanaoui@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/10/29 15:24:23 by bsanaoui          #+#    #+#             */
-/*   Updated: 2021/11/03 16:52:03 by bsanaoui         ###   ########.fr       */
+/*   Updated: 2021/11/06 18:08:32 by bsanaoui         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,8 +15,8 @@
 
 static void	*philosopher(void *phi)
 {
-	t_philo *philo;
-	
+	t_philo	*philo;
+
 	philo = (t_philo *)phi;
 	while (1)
 	{
@@ -32,13 +32,14 @@ static t_philo	*init_philos(t_param *p)
 	int				i;
 	t_philo			*philos;
 	pthread_mutex_t	*forks;
+	pthread_mutex_t	*display_mutex;
 
-	//*********** init mutex ************//
-	forks = init_forks_mutex(p->number_of_philos);
-	//*************************************//
-	philos = (t_philo *)malloc(sizeof(t_philo) * p->number_of_philos);
-    i = 0;
-	while (i < p->number_of_philos)
+	philos = (t_philo *)malloc(sizeof(t_philo) * p->nb_of_philos);
+	forks = init_forks_mutex(p->nb_of_philos);
+	display_mutex = malloc (sizeof(pthread_mutex_t));
+	pthread_mutex_init(display_mutex, NULL);
+	i = 0;
+	while (i < p->nb_of_philos)
 	{
 		philos[i].forks = forks;
 		philos[i].p = p;
@@ -46,6 +47,7 @@ static t_philo	*init_philos(t_param *p)
 		philos[i].e_status = THINKING;
 		philos[i].last_time_eat = ft_get_time();
 		philos[i].nb_eat = 0;
+		philos[i].display_mutex = display_mutex;
 		pthread_create(&philos[i].tid, NULL, philosopher, &philos[i]);
 		i++;
 	}
@@ -54,45 +56,42 @@ static t_philo	*init_philos(t_param *p)
 
 static int	supervisor(t_philo *philos)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (1)
 	{
-		if (philos[i % philos->p->number_of_philos].e_status != EATING && (ft_get_time() - philos[i % philos->p->number_of_philos].last_time_eat) >  philos->p->time_to_die)
+		if (philos[i].e_status != EATING
+			&& (ft_get_time() - philos[i].last_time_eat)
+			> philos->p->time_to_die)
 		{
-			printf("%llu %d died\n",ft_get_time(), philos[i %  philos->p->number_of_philos].id);
+			pthread_mutex_lock(philos->display_mutex);
+			printf("%llu %d died\n", ft_get_time(), philos[i].id);
 			return (0);
 		}
-		if (are_finish_eating_nb(philos, philos->p->number_of_philos))
+		if (philos->p->number_time_eat != -1
+			&& are_finish_eating_nb(philos, philos->p->nb_of_philos))
 			return (0);
 		i++;
+		i = i % philos->p->nb_of_philos;
 	}
 	return (1);
 }
 
-int main(int argc, char *argv[])
+int	main(int argc, char *argv[])
 {
-    t_param 		*param;
-	t_philo			*philos;
-	int		i;
+	t_param	*param;
+	t_philo	*philos;
 
-    param = collect_data(argc, argv);
-	// printf("%d %llu %llu %llu %d\n", param->number_of_philos, param->time_to_die, param->time_to_die, param->time_to_sleep, param->number_time_eat);
-	
-	//*********** Create Philos ********//
-    philos = init_philos(param);
-	
-	//********* Supervisor **************//
-	if (!supervisor(philos))
+	param = collect_data(argc, argv);
+	if (!param->nb_of_philos)
+	{
+		if (param)
+			free(param);
 		return (0);
-	//************ finally *************//
-	i = -1;
-	while (++i < param->number_of_philos)
-		pthread_join(philos[i].tid, NULL);
-	//**********************************//
-	destroy_forks_mutex(philos->forks, param->number_of_philos);
-    return (0);
+	}
+	philos = init_philos(param);
+	if (!supervisor(philos))
+		return (ft_finalize(philos));
+	return (0);
 }
-
-// deadlock
